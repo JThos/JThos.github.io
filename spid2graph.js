@@ -1,4 +1,4 @@
-﻿/*SPID2GRAPH version 3.6.0.0*/
+﻿/*SPID2GRAPH version 3.7.0.0*/
 
 var corrector = 3.775;
 var minTolerance=10;
