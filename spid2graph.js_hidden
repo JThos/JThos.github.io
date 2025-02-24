@@ -1150,7 +1150,7 @@ function populatePathsTable(wtitle) {
 			
 		tempHTML+='<tr><td><input type="checkbox" id="path_'+i+'" onchange="checkboxChanged(\'path_'+i+'\')" checked></td>';
 		tempHTML+='<td><button class="copy-btn" id="cc_'+i+'" onclick="copyPathToClipboard(['+textedPath+']);">'+
-							'<img src="copy.jpg" alt="Copy path to clipboard" class="icono"></button></td>';
+							'<img src="https://jthos.github.io/copy.jpg" alt="Copy path to clipboard" class="icono"></button></td>';
 		tempHTML+='<td>Path '+(i+1)+': '+paths[i].length+' nodes</td></tr>';
 		
 		highlightPath(item);
