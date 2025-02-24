@@ -1,4 +1,4 @@
-ï»¿/*SPID2GRAPH version 3.7.0.0*/
+/*SPID2GRAPH version 3.7.0.1*/
 
 var corrector = 3.775;
 var minTolerance=10;
@@ -632,7 +632,7 @@ function setupContextMenu()
   modal = document.getElementById('modal');
   propertiesTable = document.getElementById('propertiesTable');
      
-  // Ocultar el menÃº al hacer clic en cualquier lugar del documento
+  // Ocultar el menú al hacer clic en cualquier lugar del documento
   document.addEventListener('click', () => {
   	contextMenu.classList.remove('show');
   });
@@ -669,7 +669,7 @@ function setupContextMenu()
   
 }
 
-// Funciones para las opciones del menÃº
+// Funciones para las opciones del menú
 function showDownstreamPaths() {
   var modal = document.getElementById("modal");
   modal.classList.add("active");
@@ -1091,6 +1091,39 @@ function highlightPath(path=[])
 	}
 }
 
+
+function copyPathToClipboard(path=[])
+{
+	var result="[";
+	for(i=0;i<path.length;i++)
+	{ 
+		var nodeElement = xmlDoc.getElementById(path[i]);
+		var nodeItemTag = nodeElement.children[0].getAttribute("ItemTag");
+		if (nodeItemTag==null) nodeItemTag=nodeElement.id;
+		
+		//result+="node("+nodeItemTag+"),";
+		result+=nodeItemTag+",";
+		
+		/*
+		if (i>0)
+		{
+		var edge = xmlDoc.evaluate("//Edge[(@StartNode='"+path[i-1]+"' and @EndNode='"+path[i]+"') or (@StartNode='"+path[i]+"' and @EndNode='"+path[i-1]+"')]",xmlDoc,null,XPathResult.ANY_TYPE,null);
+		var edgeElement = edge.iterateNext();
+		var edgeItemTag = edgeElement.children[0].getAttribute("ItemTag");
+		if (edgeItemTag==null) edgeItemTag=edgeElement.id;
+		//var edgeId = edgeResult.attributes[0].value;
+		
+		result+="edge("+edgeItemTag+"),";
+		}*/
+	}
+	result=result.slice(0, -1);
+	result+="]";
+	window.navigator.clipboard.writeText(result);
+	//alert("Path was copied to clipboard:\n" + result);
+	
+}
+
+
 function populatePathsTable(wtitle) {
 	
 	var paths=selectedPaths;
@@ -1109,13 +1142,15 @@ function populatePathsTable(wtitle) {
 	tempHTML+="<table><tr valign='top'>";
 	var i=0;
 	paths.forEach(item => {
-		
+		textedPath=item.map(function textItem(x){return "'"+x+"'";})
 		if (i==0)
 			tempHTML+="<td><table>";
 		else if (i%maxRowsPerColumn==0)
 			tempHTML+="</table></td><td><table>";
 			
 		tempHTML+='<tr><td><input type="checkbox" id="path_'+i+'" onchange="checkboxChanged(\'path_'+i+'\')" checked></td>';
+		tempHTML+='<td><button class="copy-btn" id="cc_'+i+'" onclick="copyPathToClipboard(['+textedPath+']);">'+
+							'<img src="copy.jpg" alt="Copy path to clipboard" class="icono"></button></td>';
 		tempHTML+='<td>Path '+(i+1)+': '+paths[i].length+' nodes</td></tr>';
 		
 		highlightPath(item);
