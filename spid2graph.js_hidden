@@ -1,4 +1,4 @@
-/*SPID2GRAPH version 3.7.0.1*/
+/*SPID2GRAPH version 3.7.0.2*/
 
 var corrector = 3.775;
 var minTolerance=10;
@@ -26,13 +26,15 @@ let viewBox = [800, -0, 1800, 1800];
 let isPanning = false;
 let startX, startY;
 
+var isolatedItemId="";
 var downstreamNodeFilter="";
 var downstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
 var upstreamNodeFilter="";
 var upwnstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
-var isolateNodeFilter="/Data[contains(@Subtype,'valve')]";
+var isolateNodeFilter="/Data[contains(@Subtype,'valve') or @Type='Nozzle']";
 var isolateEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
-		
+var listOfChildNozzles="";
+
 function makeDraggable()
 {
 	//var svg = evt.target;
@@ -638,6 +640,31 @@ function setupContextMenu()
   });
   
   
+  //RMB Menu Options
+
+		let ul = document.querySelector("#contextMenu ul");
+		
+		let li = document.createElement("li");
+		li.textContent="Isolate Equipment";
+		li.onclick = equipmentIsolationPaths;
+		ul.appendChild(li);
+  
+  	li = document.createElement("li");
+		li.textContent="Downstream paths";
+		li.onclick = showDownstreamPaths;
+		ul.appendChild(li);
+		
+		li = document.createElement("li");
+		li.textContent="Upstream paths";
+		li.onclick = showUpstreamPaths;
+		ul.appendChild(li);
+		
+		li = document.createElement("li");
+		li.textContent="Properties";
+		li.onclick = showProperties;
+		ul.appendChild(li);
+		  
+  
   const windowElement = document.getElementById("floatingWindow");
   const headerElement = document.getElementById("windowHeader");
 	const closeButton = document.getElementById("closeButton");
@@ -912,9 +939,13 @@ function _findStreamPaths(node1Id, direction, nodeFilter, edgeFilter, lengthLimi
   
   //If direction=="" and target is reached, just return currentpath. This is for IsolateEquipment
  	if (direction=="")
- 		if (evaluateCriteria(node1Id,nodeFilter))
-    	return [currentPath]; //Result is an array of paths
-  
+ 	{
+	 	if (! listOfChildNozzles.includes(node1Id)  ) //Nozzles directly connected to isolatedItemId will never be an isolation point
+	 	{
+	 		if (evaluateCriteria(node1Id,nodeFilter))
+	    	return [currentPath]; //Result is an array of paths
+	  }
+  }
     
   const allPaths = [];
   var numOfVisitedEdges=0;
@@ -1060,22 +1091,46 @@ function FindUpstreamPaths(node1Id)
 
 function IsolateEquipment(node1Id)
 {
-		var lengthLimit=defaultPathLengthLimit;
 		
-		//isolateNodeFilter="/Data[contains(@Subtype,'valve')]";
-		//isolateEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
+		itemToIsolate = xmlDoc.getElementById(node1Id);
 		
-		result = _findStreamPaths(node1Id, "", isolateNodeFilter, isolateEdgeFilter).sort((a,b) => a.length - b.length);
-		if (result.length>0)
-			console.log("IsolateEquipment : Max path lengh = " + result[result.length-1].length);
-		if (lengthExcededCount>0)
+		if (itemToIsolate.children[0].getAttribute("Type")=="Equipment")
 		{
-			console.log("WARNING: " + lengthExcededCount + " search branches where discarded, because prune length (" + lengthLimit + ") was exceeded.");
-			lengthExcededCount=0;
-		}
-		result.forEach(highlightPath);
 		
-		return result;
+			//Get all the elements (for example nozzles) directly connected to Equipment to be isolated. These are not isolation points, but other nozzles should.
+			listOfChildNozzles="";
+			
+			var nozzles1 = xmlDoc.evaluate("//Node[@id=//Edge[@Type='DirectConnection' and @EndNode='"+node1Id+"']/@StartNode]/@id",xmlDoc,null,XPathResult.ANY_TYPE,null);
+			while (noz1=nozzles1.iterateNext())
+				listOfChildNozzles+=noz1.value+",";
+			
+			var nozzles2 = xmlDoc.evaluate("//Node[@id=//Edge[@Type='DirectConnection' and @StartNode='"+node1Id+"']/@EndNode]/@id",xmlDoc,null,XPathResult.ANY_TYPE,null);
+			while (noz2=nozzles2.iterateNext())
+				listOfChildNozzles+=noz2.value+",";
+			
+			isolatedItemId=node1Id;
+			
+			var lengthLimit=defaultPathLengthLimit;
+			
+			//isolateNodeFilter="[not(@id='"+node1Id+"')]/Data[contains(@Subtype,'valve')]";
+			//isolateEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
+			
+			result = _findStreamPaths(node1Id, "", isolateNodeFilter, isolateEdgeFilter).sort((a,b) => a.length - b.length);
+			if (result.length>0)
+				console.log("IsolateEquipment : Max path lengh = " + result[result.length-1].length);
+			if (lengthExcededCount>0)
+			{
+				console.log("WARNING: " + lengthExcededCount + " search branches where discarded, because prune length (" + lengthLimit + ") was exceeded.");
+				lengthExcededCount=0;
+			}
+			result.forEach(highlightPath);
+			
+			isolatedItemId="";
+			
+			return result;
+		}
+		
+		
 }
 
 
