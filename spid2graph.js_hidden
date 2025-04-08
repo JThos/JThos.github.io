@@ -1,4 +1,4 @@
-/*SPID2GRAPH version 3.7.2.0*/
+/*SPID2GRAPH version 3.7.3.0*/
 
 var corrector = 3.775;
 var minTolerance=10;
@@ -10,6 +10,9 @@ var parser = new DOMParser();
 var xmlDoc;
 var drawing;
 var selectedElement, offset, transform;
+var selectSet=[];
+var patterns;
+var patternsDoc;
 var xml;
 var highlightedItem="";
 var defaultPathLengthLimit=250;
@@ -129,6 +132,8 @@ function startDrag(evt)
 			
 			highlightedItem=evt.target.getAttribute("id");
 			highlight(highlightedItem);
+			
+			if (!selectSet.includes(highlightedItem)) selectSet.push(highlightedItem);
 			
 	    if (evt.target.classList.contains('draggable')||evt.target.classList.contains('draggable_highlighted'))
 	    {
@@ -615,8 +620,157 @@ function go()
    
    
   document.addEventListener('keydown', KeyPressed, false);
-     
+  
+  
+  // Agregar un botón para abrir el chatbot
+const chatButton = document.createElement('button');
+chatButton.innerText = 'Chat P&ID';
+chatButton.style.position = 'fixed';
+chatButton.style.bottom = '20px';
+chatButton.style.right = '20px';
+chatButton.style.padding = '10px 20px';
+chatButton.style.background = '#007bff';
+chatButton.style.color = 'white';
+chatButton.style.border = 'none';
+chatButton.style.borderRadius = '5px';
+chatButton.style.cursor = 'pointer';
+document.body.appendChild(chatButton);
+
+// Crear el modal del chatbot
+const chatModal = document.createElement('div');
+chatModal.style.position = 'fixed';
+chatModal.style.bottom = '60px';
+chatModal.style.right = '20px';
+chatModal.style.width = '300px';
+chatModal.style.height = '400px';
+chatModal.style.background = 'white';
+chatModal.style.border = '1px solid #ccc';
+chatModal.style.borderRadius = '10px';
+chatModal.style.display = 'none';
+chatModal.style.flexDirection = 'column';
+chatModal.style.padding = '10px';
+chatModal.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)';
+document.body.appendChild(chatModal);
+
+// Área de mensajes
+const chatMessages = document.createElement('div');
+chatMessages.style.flex = '1';
+chatMessages.style.overflowY = 'auto';
+chatMessages.style.marginBottom = '10px';
+chatModal.appendChild(chatMessages);
+
+// Input y botón de enviar
+const chatInput = document.createElement('input');
+chatInput.type = 'text';
+chatInput.style.width = 'calc(100% - 20px)';
+chatInput.style.padding = '5px';
+chatModal.appendChild(chatInput);
+
+const sendButton = document.createElement('button');
+sendButton.innerText = 'Enviar';
+sendButton.style.width = '100%';
+sendButton.style.marginTop = '5px';
+chatModal.appendChild(sendButton);
+
+// Mostrar u ocultar el modal
+chatButton.addEventListener('click', () => {
+    chatModal.style.display = chatModal.style.display === 'none' ? 'flex' : 'none';
+});
+  
+  // Función para procesar la consulta y resaltar en el SVG
+sendButton.addEventListener('click', async () => {
+    const query = chatInput.value;
+    if (!query) return;
+
+    // Agregar consulta al chat
+    const userMessage = document.createElement('div');
+    userMessage.innerText = `Tú: ${query}`;
+    chatMessages.appendChild(userMessage);
+
+    // Llamar a ChatGPT para procesar la consulta
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer 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`
+        },
+        body: JSON.stringify({
+    model: "gpt-3.5-turbo",  // Cambia el modelo aquí
+    messages: [{ role: "user", content: "Tu pregunta aquí" }],
+    temperature: 0.7
+})
+    });
+    const data = await response.json();
+    console.log("Respuesta de la API:", data);
+    const answer = data.choices[0].message.content;
+
+    // Agregar respuesta al chat
+    const botMessage = document.createElement('div');
+    botMessage.innerText = `Bot: ${answer}`;
+    chatMessages.appendChild(botMessage);
+
+    // Buscar en xmlDoc los elementos mencionados en la respuesta
+    const elementsToHighlight = findElementsInXML(answer);
+    elementsToHighlight.forEach(element => {
+        highlight(element); // Llamar a la función existente en spid2graph.js
+    });
+
+    chatInput.value = '';
+});
+  
+  
 }//go
+
+function GetPattern()
+{
+	
+	var elSet = parser.parseFromString("<Pattern Name='give me a name'></Pattern>",'text/xml');
+	
+	selectSet.forEach(
+		function(id){
+			var e=xmlDoc.evaluate("//*[@id='" + id + "']",xmlDoc,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);
+			var newEl = parser.parseFromString(e.singleNodeValue.outerHTML,"text/xml").documentElement;
+			elSet.documentElement.appendChild(newEl);
+		}
+	);
+	
+	//Anonimizar identificadores
+	var dict={};
+	var list=elSet.evaluate("//Node",elSet,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+	for (var i = 0; i < list.snapshotLength; i++)
+	{
+		var elmt = list.snapshotItem(i);
+		var id=elmt.getAttribute("id");
+		var newId = "N"+i.toString().padStart(2,0);
+    dict[id]=newId;
+    elmt.setAttribute("id",newId);
+    if (i==0) elmt.setAttribute("Reference","yes");
+    elmt.removeAttribute("cx");
+    elmt.removeAttribute("cy");
+	}
+	
+	var list=elSet.evaluate("//Edge",elSet,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+	for (var i = 0; i < list.snapshotLength; i++)
+	{
+		var elmt = list.snapshotItem(i);
+		var id=elmt.getAttribute("id");
+		var newId = "E"+i.toString().padStart(2,0);
+    dict[id]="E"+i.toString().padStart(2,0);
+    elmt.setAttribute("id",newId);
+    var startNode = elmt.getAttribute("StartNode");
+    var endNode = elmt.getAttribute("EndNode");
+    var dStart = dict[startNode] ?? "";
+    var dEnd = dict[endNode] ?? "";
+    elmt.setAttribute("StartNode",dStart);
+    elmt.setAttribute("EndNode",dEnd);
+    elmt.removeAttribute("RunID");
+	}
+	
+	window.navigator.clipboard.writeText(elSet.documentElement.outerHTML);
+	
+	alert("Pattern was successfully copied to Clipboard");
+}
+
 
 function KeyPressed()
 {
@@ -625,6 +779,7 @@ function KeyPressed()
     todo=document.querySelectorAll("svg *")
 		todo.forEach(el => unhighlight(el.getAttribute("id")));
 		document.getElementById("floatingWindow").style.display = "none";
+		selectSet=[];
   }
 }
 
@@ -662,6 +817,11 @@ function setupContextMenu()
 		li = document.createElement("li");
 		li.textContent="Properties";
 		li.onclick = showProperties;
+		ul.appendChild(li);
+		
+		li = document.createElement("li");
+		li.textContent="Copy as pattern";
+		li.onclick = GetPattern;
 		ul.appendChild(li);
 		  
   
@@ -1241,4 +1401,24 @@ function checkboxChanged(id)
 			highlightPath(paths[j]);
 	}
 	
+}
+
+
+
+
+
+// Función para encontrar elementos en el XML
+function findElementsInXML(answer) {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlDoc, 'text/xml');
+    const elements = [];
+    
+    // Buscar nodos o aristas mencionadas en la respuesta
+    xml.querySelectorAll('Node, Edge').forEach(node => {
+        if (answer.includes(node.getAttribute('id'))) {
+            elements.push(node.getAttribute('id'));
+        }
+    });
+    
+    return elements;
 }
