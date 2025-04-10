@@ -1,4 +1,4 @@
-/*SPID2GRAPH version 3.7.3.0*/
+/*SPID2GRAPH version 3.7.4.0*/
 
 var corrector = 3.775;
 var minTolerance=10;
@@ -31,11 +31,11 @@ let startX, startY;
 
 var isolatedItemId="";
 var downstreamNodeFilter="";
-var downstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
+var downstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection' or @Type='ConnectToProcess']";
 var upstreamNodeFilter="";
-var upwnstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
+var upstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection' or @Type='ConnectToProcess']";
 var isolateNodeFilter="/Data[(contains(@Subtype,'valve') and not(contains(@Subtype,'Check')) and not(contains(@Subtype,'check'))) or @Type='Nozzle']";
-var isolateEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
+var isolateEdgeFilter="[@Type='Piping' or @Type='DirectConnection' or @Type='ConnectToProcess']";
 var listOfChildNozzles="";
 
 function makeDraggable()
@@ -1136,9 +1136,9 @@ function FindUpstreamPaths(node1Id)
 		var lengthLimit=defaultPathLengthLimit;
 		
 		//upstreamNodeFilter="";
-		//upwnstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
+		//upstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection']";
 		
-		result = _findStreamPaths(node1Id, "Upstream", upstreamNodeFilter, upwnstreamEdgeFilter).sort((a,b) => a.length - b.length);
+		result = _findStreamPaths(node1Id, "Upstream", upstreamNodeFilter, upstreamEdgeFilter).sort((a,b) => a.length - b.length);
 		if (result.length>0)
 			console.log("FindUpstreamPaths : Max path lengh = " + result[result.length-1].length);
 		if (lengthExcededCount>0)
