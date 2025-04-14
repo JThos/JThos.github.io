@@ -1,4 +1,4 @@
-/*SPID2GRAPH version 3.7.4.0*/
+/*SPID2GRAPH version 3.7.5.0*/
 
 var corrector = 3.775;
 var minTolerance=10;
@@ -34,7 +34,7 @@ var downstreamNodeFilter="";
 var downstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection' or @Type='ConnectToProcess']";
 var upstreamNodeFilter="";
 var upstreamEdgeFilter="[@Type='Piping' or @Type='DirectConnection' or @Type='ConnectToProcess']";
-var isolateNodeFilter="/Data[(contains(@Subtype,'valve') and not(contains(@Subtype,'Check')) and not(contains(@Subtype,'check'))) or @Type='Nozzle']";
+var isolateNodeFilter="/Data[( (contains(@Subtype,'valve') or contains(@Subtype,'Valve') ) and not(contains(@Subtype,'Check')) and not(contains(@Subtype,'check'))) or @Type='Nozzle']";
 var isolateEdgeFilter="[@Type='Piping' or @Type='DirectConnection' or @Type='ConnectToProcess']";
 var listOfChildNozzles="";
 
