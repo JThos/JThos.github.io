@@ -371,11 +371,20 @@
   }
   
   // Initialize when window loads
+  if (document.readyState === 'complete') {
+    setTimeout(function() {
+        window.skillManager = initSkillManager();
+    }, 1500);
+} else
+	{
   window.addEventListener('load', function() {
     // Wait for the chat interface to initialize
     setTimeout(function() {
       // Initialize and expose the skill manager
       window.skillManager = initSkillManager();
     }, 1500);
-  });
+  
+}
+);}
+
 })();
