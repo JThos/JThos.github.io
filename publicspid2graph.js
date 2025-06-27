@@ -11,8 +11,6 @@ var xmlDoc;
 var drawing;
 var selectedElement, offset, transform;
 var selectSet=[];
-var patterns;
-var patternsDoc;
 var xml;
 var highlightedItem="";
 var defaultPathLengthLimit=250;
@@ -623,57 +621,6 @@ function go()
     
 }//go
 
-function GetPattern()
-{
-	
-	var elSet = parser.parseFromString("<Pattern Name='give me a name'></Pattern>",'text/xml');
-	
-	selectSet.forEach(
-		function(id){
-			var e=xmlDoc.evaluate("//*[@id='" + id + "']",xmlDoc,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);
-			var newEl = parser.parseFromString(e.singleNodeValue.outerHTML,"text/xml").documentElement;
-			elSet.documentElement.appendChild(newEl);
-		}
-	);
-	
-	//Anonimizar identificadores
-	var dict={};
-	var list=elSet.evaluate("//Node",elSet,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-	for (var i = 0; i < list.snapshotLength; i++)
-	{
-		var elmt = list.snapshotItem(i);
-		var id=elmt.getAttribute("id");
-		var newId = "N"+i.toString().padStart(2,0);
-    dict[id]=newId;
-    elmt.setAttribute("id",newId);
-    if (i==0) elmt.setAttribute("Reference","yes");
-    elmt.removeAttribute("cx");
-    elmt.removeAttribute("cy");
-	}
-	
-	var list=elSet.evaluate("//Edge",elSet,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-	for (var i = 0; i < list.snapshotLength; i++)
-	{
-		var elmt = list.snapshotItem(i);
-		var id=elmt.getAttribute("id");
-		var newId = "E"+i.toString().padStart(2,0);
-    dict[id]="E"+i.toString().padStart(2,0);
-    elmt.setAttribute("id",newId);
-    var startNode = elmt.getAttribute("StartNode");
-    var endNode = elmt.getAttribute("EndNode");
-    var dStart = dict[startNode] ?? "";
-    var dEnd = dict[endNode] ?? "";
-    elmt.setAttribute("StartNode",dStart);
-    elmt.setAttribute("EndNode",dEnd);
-    elmt.removeAttribute("RunID");
-	}
-	
-	window.navigator.clipboard.writeText(elSet.documentElement.outerHTML);
-	
-	alert("Pattern was successfully copied to Clipboard");
-}
-
-
 function KeyPressed()
 {
 	if (event.key === "Escape")
@@ -720,12 +667,7 @@ function setupContextMenu()
 		li.textContent="Properties";
 		li.onclick = showProperties;
 		ul.appendChild(li);
-		
-		li = document.createElement("li");
-		li.textContent="Copy as pattern";
-		li.onclick = GetPattern;
-		ul.appendChild(li);
-		  
+				  
   
   const windowElement = document.getElementById("floatingWindow");
   const headerElement = document.getElementById("windowHeader");
