@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actividades Newland</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1a2e;
+      --muted: #5a5a72;
+      --rule: #d4d4e0;
+      --accent: #2c5f8a;
+      --bg: #f7f7f9;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 60px 20px 80px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 760px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+
+    .org-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Lora', serif;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .activity-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .activity-item {
+      background: var(--white);
+      border: 1px solid var(--rule);
+      border-left: 3px solid var(--accent);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .activity-main {
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .activity-number {
+      font-family: 'Lora', serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: #eaf1f8;
+      padding: 3px 9px;
+      border-radius: 2px;
+      white-space: nowrap;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .activity-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    .activity-meta {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .sublist {
+      list-style: none;
+      border-top: 1px solid var(--rule);
+      background: #fafafa;
+    }
+
+    .sublist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 24px 14px 36px;
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.15s;
+    }
+
+    .sublist-item:last-child {
+      border-bottom: none;
+    }
+
+    .sublist-item:hover {
+      background: #f0f4f8;
+    }
+
+    .sub-number {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-top: 2px;
+      flex-shrink: 0;
+      min-width: 28px;
+    }
+
+    .sub-text {
+      font-size: 0.9rem;
+      color: #3a3a52;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+		.sub-total {
+      font-size: 1rem;
+      color: #3a3a52;
+      line-height: 1.5;
+      font-weight: 900;
+    }
+    
+    footer {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="org-label">Registro de actividades</p>
+      <h1>Newland</h1>
+    </header>
+
+    <ul class="activity-list">
+      <li class="activity-item">
+        <div class="activity-main">
+          <span class="activity-number">1</span>
+          <div>
+            <div class="activity-title">
+						  AppInformes 1.2.1 
+						  <a href="AppInformes_1.2.1.zip" download style="font-size:0.8rem; font-weight:400; color:var(--accent); text-decoration:none; margin-left:8px; border-bottom:1px solid var(--accent);">
+						    ↓ Descargar
+						  </a>
+						</div>
+            <div class="activity-meta">8 de marzo de 2026</div>
+          </div>
+        </div>
+        <ul class="sublist">
+          <li class="sublist-item">
+            <span class="sub-number">1.1</span>
+            <span class="sub-text">Modificación AppInformes por cambio criterios de fecha en Selenne (Informe de Ingresos y Gastos)</span>
+          </li>
+          <li class="sublist-item">
+            <span class="sub-number">1.2</span>
+            <span class="sub-text">Desarrollo de sistema de plantillas para definición de ancho de columnas de informes</span>
+          </li>
+          <li class="sublist-item">
+            <span class="sub-number"></span>
+            <span class="sub-total">Total: 150 &euro;</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <footer></footer>
+  </div>
+</body>
+</html>
